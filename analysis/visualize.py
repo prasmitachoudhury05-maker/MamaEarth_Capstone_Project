@@ -58,23 +58,39 @@ def generate_visualizations():
     df["is_outlier"] = df["quantity"] > upper_bound
 
     # -------------------------------------------------------------------------
-    # Chart 1: Return Rate by Payment Method (Bar Chart)
+    # Chart 1: Return Rate by Payment Method (Bar Chart - Royal Indigo & Coral)
     # -------------------------------------------------------------------------
     rr_df = df.groupby("payment_method")["returned"].agg(["count", "mean"]).reset_index()
     rr_df["return_rate_pct"] = (rr_df["mean"] * 100).round(1)
     rr_df = rr_df.sort_values(by="return_rate_pct", ascending=False)
 
     plt.figure(figsize=(8, 5.5), dpi=300)
-    colors = ["#C94A29" if pm == "COD" else "#2E6B4F" for pm in rr_df["payment_method"]]
-    bars = plt.bar(rr_df["payment_method"], rr_df["return_rate_pct"], color=colors, width=0.55, edgecolor="#1F2A24", linewidth=1.2)
+    
+    # Modern Royal Indigo & Vibrant Coral Accent Palette
+    palette_map = {
+        "COD": "#E11D48",   # Vibrant Coral/Rose for high-risk COD
+        "UPI": "#4F46E5",   # Royal Indigo for UPI
+        "CARD": "#3B82F6",  # Electric Blue for CARD
+    }
+    colors = [palette_map.get(pm, "#4F46E5") for pm in rr_df["payment_method"]]
+    
+    bars = plt.bar(
+        rr_df["payment_method"],
+        rr_df["return_rate_pct"],
+        color=colors,
+        width=0.52,
+        edgecolor="#0F172A",
+        linewidth=1.2,
+        alpha=0.92,
+    )
 
-    plt.title("COD Returns at 44.4% — 3x Higher Than Card", fontsize=14, fontweight="bold", pad=15, color="#17402F")
-    plt.xlabel("Payment Method", fontsize=11, fontweight="bold", labelpad=10, color="#1F2A24")
-    plt.ylabel("Return Rate (%)", fontsize=11, fontweight="bold", labelpad=10, color="#1F2A24")
+    plt.title("COD Returns at 44.4% — 3x Higher Than Card", fontsize=14, fontweight="bold", pad=15, color="#0F172A")
+    plt.xlabel("Payment Method", fontsize=11, fontweight="bold", labelpad=10, color="#1E293B")
+    plt.ylabel("Return Rate (%)", fontsize=11, fontweight="bold", labelpad=10, color="#1E293B")
     plt.ylim(0, 55)
-    plt.grid(axis="y", linestyle="--", alpha=0.4)
+    plt.grid(axis="y", linestyle="--", alpha=0.35, color="#94A3B8")
 
-    # Annotate bar values
+    # Annotate bar values with clean formatting
     for bar in bars:
         height = bar.get_height()
         plt.text(
@@ -83,16 +99,16 @@ def generate_visualizations():
             f"{height:.1f}%",
             ha="center",
             va="bottom",
-            fontsize=11,
+            fontsize=11.5,
             fontweight="bold",
-            color="#1F2A24",
+            color="#0F172A",
         )
 
     plt.tight_layout()
     chart1_path = os.path.join("visualizations", "return_rate_by_payment.png")
     plt.savefig(chart1_path, dpi=300)
     plt.close()
-    print(f"Saved Chart 1: {chart1_path}")
+    print(f"Saved Chart 1 (Royal Indigo & Coral): {chart1_path}")
 
     # -------------------------------------------------------------------------
     # Chart 2: Monthly Revenue Trend (Outlier-Corrected Line Chart)
