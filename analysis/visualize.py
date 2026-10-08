@@ -58,7 +58,7 @@ def generate_visualizations():
     df["is_outlier"] = df["quantity"] > upper_bound
 
     # -------------------------------------------------------------------------
-    # Chart 1: Return Rate by Payment Method (Bar Chart - Royal Indigo & Coral)
+    # Chart 1: Return Rate by Payment Method (Bar Chart - Dark to Light Blue)
     # -------------------------------------------------------------------------
     rr_df = df.groupby("payment_method")["returned"].agg(["count", "mean"]).reset_index()
     rr_df["return_rate_pct"] = (rr_df["mean"] * 100).round(1)
@@ -66,13 +66,16 @@ def generate_visualizations():
 
     plt.figure(figsize=(8, 5.5), dpi=300)
     
-    # Modern Royal Indigo & Vibrant Coral Accent Palette
+    # Sequential Dark-to-Light Blue Gradient
+    # Highest (COD: 44.4%) -> Deep Midnight Blue
+    # Medium  (UPI: 18.9%) -> Royal Cobalt Blue
+    # Lowest  (CARD: 14.7%) -> Soft Sky Blue
     palette_map = {
-        "COD": "#E11D48",   # Vibrant Coral/Rose for high-risk COD
-        "UPI": "#4F46E5",   # Royal Indigo for UPI
-        "CARD": "#3B82F6",  # Electric Blue for CARD
+        "COD": "#1E3A8A",   # Deep Navy / Midnight Blue
+        "UPI": "#3B82F6",   # Royal Cobalt Blue
+        "CARD": "#93C5FD",  # Soft Sky Blue
     }
-    colors = [palette_map.get(pm, "#4F46E5") for pm in rr_df["payment_method"]]
+    colors = [palette_map.get(pm, "#1E3A8A") for pm in rr_df["payment_method"]]
     
     bars = plt.bar(
         rr_df["payment_method"],
@@ -81,7 +84,7 @@ def generate_visualizations():
         width=0.52,
         edgecolor="#0F172A",
         linewidth=1.2,
-        alpha=0.92,
+        alpha=0.95,
     )
 
     plt.title("COD Returns at 44.4% — 3x Higher Than Card", fontsize=14, fontweight="bold", pad=15, color="#0F172A")
