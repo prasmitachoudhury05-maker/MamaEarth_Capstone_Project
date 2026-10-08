@@ -5,3 +5,7 @@ __pycache__/
 .env
 .DS_Store
 Thumbs.db
+
+# Guidelines & Reference decks
+Downloads/
+MamaEarth/
