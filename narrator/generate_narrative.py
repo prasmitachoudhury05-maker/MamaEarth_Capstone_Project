@@ -183,13 +183,31 @@ def verify_numeric_accuracy(narrative: str) -> bool:
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Mamaearth GenAI Insight Narrator")
+    parser.add_argument(
+        "--mode",
+        choices=["auto", "online", "offline"],
+        default="auto",
+        help="Generation mode: 'auto' (tries Gemini then falls back to offline), 'online' (requires Gemini), 'offline' (deterministic template)",
+    )
+    parser.add_argument(
+        "--findings",
+        default=None,
+        help="Path to findings.json (defaults to narrator/findings.json)",
+    )
+    args = parser.parse_args()
+
     print("=" * 80)
     print("MAMAEARTH GENAI INSIGHT NARRATOR PIPELINE")
     print("=" * 80)
 
-    findings_file = os.path.join(os.path.dirname(__file__), "findings.json")
-    if not os.path.exists(findings_file):
-        findings_file = os.path.join("narrator", "findings.json")
+    findings_file = args.findings
+    if not findings_file:
+        findings_file = os.path.join(os.path.dirname(__file__), "findings.json")
+        if not os.path.exists(findings_file):
+            findings_file = os.path.join("narrator", "findings.json")
 
     if not os.path.exists(findings_file):
         print(f"Error: {findings_file} not found. Please run analysis/clean_and_eda.py first.")
@@ -201,18 +219,31 @@ def main():
     print(f"Loaded verified metrics from {findings_file}:")
     print(json.dumps(findings, indent=2))
 
-    # Attempt Online Generation via Gemini API
-    print("\n--- Attempting Online Generation via Gemini API ---")
-    result = generate_scr_narrative(findings)
+    narrative = None
+    result = None
 
-    if result["status"] == "success" and result["narrative"]:
-        print("Online Gemini generation succeeded!")
-        narrative = result["narrative"]
-    else:
-        print(f"Online path skipped/unavailable: {result.get('message')}")
-        print("Executing deterministic offline fallback path...")
+    if args.mode == "offline":
+        print("\n--- Executing Deterministic Offline Fallback Path (--mode offline) ---")
         result = generate_scr_narrative_offline(findings)
         narrative = result["narrative"]
+    elif args.mode == "online":
+        print("\n--- Executing Online Generation via Gemini API (--mode online) ---")
+        result = generate_scr_narrative(findings)
+        if result["status"] != "success":
+            print(f"Error: Online generation failed: {result.get('message')}")
+            sys.exit(1)
+        narrative = result["narrative"]
+    else:  # auto
+        print("\n--- Attempting Online Generation via Gemini API (Mode: Auto) ---")
+        result = generate_scr_narrative(findings)
+        if result["status"] == "success" and result["narrative"]:
+            print("Online Gemini generation succeeded!")
+            narrative = result["narrative"]
+        else:
+            print(f"Online path skipped/unavailable: {result.get('message')}")
+            print("Executing deterministic offline fallback path...")
+            result = generate_scr_narrative_offline(findings)
+            narrative = result["narrative"]
 
     print("\n" + "=" * 40 + " GENERATED NARRATIVE " + "=" * 40)
     print(narrative)

@@ -16,6 +16,40 @@
 
 ---
 
+## ⚡ Quickstart (One-Command Full Pipeline Run)
+
+To run the entire 3-layer pipeline, execute the master orchestrator:
+
+```bash
+python run_pipeline.py
+```
+
+This single command automatically performs:
+1. **SQL Initialization & Reporting:** Executes DDL schema, loads raw seed records, and tests all 9 business reports against SQLite.
+2. **Python Data Wrangling & EDA:** Standardizes text casing, eliminates duplicate orders, imputes missing statistics, calculates IQR outliers, performs financial reconciliation, and outputs `narrator/findings.json`.
+3. **Visualization Generation:** Produces and saves the 2 high-resolution analytical PNG charts in `visualizations/`.
+4. **GenAI Insight Narrator:** Generates the executive SCR business briefing with automated 5-point numeric accuracy verification.
+
+---
+
+## 📖 Data Dictionary & Quality Anomaly Matrix
+
+### 1. Entity Schema Summary
+- **`customers.csv` (45 rows):** `customer_id` (PK), `name`, `city`, `city_tier` (1 or 2), `signup_date`, `acquisition_source` (`Ad`, `Organic`, `Referral`, `Social`).
+- **`products.csv` (16 rows):** `product_id` (PK), `product_name`, `category` (Haircare, Skincare, Babycare, PersonalCare), `price` (INR).
+- **`orders.csv` (180 rows):** `order_id` (PK), `customer_id` (FK), `product_id` (FK), `order_date`, `quantity`, `discount_pct`, `payment_method`, `rating`, `returned`.
+
+### 2. Intentional Data Anomalies & Resolution Strategy
+| Anomaly Type | Occurrences | Business Impact | Python Cleaning Strategy |
+| :--- | :--- | :--- | :--- |
+| **Inconsistent Casing** | 7 raw variations (`COD`, `cod`, `Card`, `card`, `CARD`, `UPI`, `upi`) | Fragmentation of channel metrics | `.str.strip().str.upper()` standardizes to canonical `CARD` (70), `UPI` (55), `COD` (55). |
+| **Duplicate Orders** | 5 rows (`O0176`–`O0180`) | Double-counted revenue (+₹2,501.90) | `.drop_duplicates(subset=[natural_key])` drops the 5 ghost submissions. |
+| **Missing Promo Discounts** | 12 blank cells | Undefined pricing calculation | Filled with `0%` (business rule: standard full-price order). |
+| **Missing Customer Ratings** | 15 blank cells | Skewed feedback averages | Imputed with column median (`3.0`) computed on deduplicated data. |
+| **Bulk Quantity Outliers** | 2 rows (`O0011` qty 25, `O0098` qty 30) | Distorts January revenue as false peak | Flagged via IQR rule ($[-0.5, 3.5]$); retained in data but isolated in trend analytics. |
+
+---
+
 ## 📁 Repository Structure
 
 ```text
