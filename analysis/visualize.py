@@ -114,7 +114,7 @@ def generate_visualizations():
     print(f"Saved Chart 1 (Royal Indigo & Coral): {chart1_path}")
 
     # -------------------------------------------------------------------------
-    # Chart 2: Monthly Revenue Trend (Outlier-Corrected Line Chart)
+    # Chart 2: Monthly Revenue Trend (Outlier-Corrected Line Chart - Dark Blue & Maroon)
     # -------------------------------------------------------------------------
     df["order_date"] = pd.to_datetime(df["order_date"])
     df["year_month"] = df["order_date"].dt.to_period("M").astype(str)
@@ -127,53 +127,58 @@ def generate_visualizations():
     revenues = monthly_clean["order_value"].tolist()
 
     plt.figure(figsize=(9, 5.5), dpi=300)
+    
+    # Trend line in Deep Dark Blue
     plt.plot(
         months,
         revenues,
         marker="o",
         markersize=8,
-        linewidth=2.5,
-        color="#2E6B4F",
+        linewidth=2.8,
+        color="#1E3A8A",  # Deep Dark Blue
         label="Outlier-Corrected Revenue",
     )
 
-    # Highlight peak month (March 2026)
+    # Highlight peak month (March 2026) in Rich Maroon
     peak_idx = months.index("2026-03")
     plt.plot(
         months[peak_idx],
         revenues[peak_idx],
         marker="o",
-        markersize=12,
-        color="#C9822A",
+        markersize=13,
+        color="#881337",  # Rich Maroon
+        markeredgecolor="#4C0519",
+        markeredgewidth=1.5,
         label="True Peak (March: ₹20,318.90)",
+        zorder=5,
     )
 
-    plt.title("Outlier-Corrected Monthly Revenue: March is the True Peak (₹20,318.90)", fontsize=13, fontweight="bold", pad=15, color="#17402F")
-    plt.xlabel("Year-Month", fontsize=11, fontweight="bold", labelpad=10, color="#1F2A24")
-    plt.ylabel("Total Cleaned Revenue (INR)", fontsize=11, fontweight="bold", labelpad=10, color="#1F2A24")
+    plt.title("Outlier-Corrected Monthly Revenue: March is the True Peak (₹20,318.90)", fontsize=13, fontweight="bold", pad=15, color="#0F172A")
+    plt.xlabel("Year-Month", fontsize=11, fontweight="bold", labelpad=10, color="#1E293B")
+    plt.ylabel("Total Cleaned Revenue (INR)", fontsize=11, fontweight="bold", labelpad=10, color="#1E293B")
     plt.ylim(6000, 24000)
-    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.grid(True, linestyle="--", alpha=0.35, color="#94A3B8")
 
-    # Annotate points
+    # Annotate points with clean labels
     for i, (m, r) in enumerate(zip(months, revenues)):
-        offset_y = 700 if i != peak_idx else 900
+        is_peak = (i == peak_idx)
         plt.annotate(
             f"₹{r:,.2f}",
             (m, r),
             textcoords="offset points",
-            xytext=(0, 10),
+            xytext=(0, 11 if is_peak else 9),
             ha="center",
-            fontsize=9.5,
+            fontsize=10 if is_peak else 9.5,
             fontweight="bold",
-            color="#C9822A" if i == peak_idx else "#1F2A24",
+            color="#881337" if is_peak else "#1E3A8A",
         )
 
-    plt.legend(loc="upper right", frameon=True)
+    plt.legend(loc="upper right", frameon=True, facecolor="#FFFFFF", edgecolor="#CBD5E1")
     plt.tight_layout()
     chart2_path = os.path.join("visualizations", "monthly_revenue_trend.png")
     plt.savefig(chart2_path, dpi=300)
     plt.close()
-    print(f"Saved Chart 2: {chart2_path}")
+    print(f"Saved Chart 2 (Dark Blue & Maroon): {chart2_path}")
 
 
 if __name__ == "__main__":
