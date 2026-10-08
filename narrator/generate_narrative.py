@@ -54,38 +54,46 @@ def generate_scr_narrative(findings: dict) -> dict:
         # System instruction establishing persona, required SCR structure, and factual grounding
         system_instruction = (
             "You are a senior data analyst writing for Mamaearth's regional ops and finance heads. "
-            "Your report must follow the SCR (Situation-Complication-Resolution) framework with three labeled sections: "
-            "## Situation, ## Complication, and ## Resolution.\n"
-            "CRITICAL REQUIREMENT: Every number in your output must come directly from the supplied findings dictionary "
-            "and appear with the exact same value. Do NOT invent, extrapolate, or estimate statistics."
+            "Your report must strictly follow the SCR (Situation-Complication-Resolution) framework with three labeled markdown sections:\n"
+            "## Situation\n"
+            "## Complication\n"
+            "## Resolution\n\n"
+            "CRITICAL CONSTRAINTS:\n"
+            "1. You must write a complete, professional narrative for all three sections.\n"
+            "2. Every number in your narrative must come directly from the supplied findings dictionary.\n"
+            "3. You must explicitly include ALL five of these required metrics in the text:\n"
+            "   - Cleaned total revenue: INR 97,358.30\n"
+            "   - Duplicate order reconciliation delta: INR 2,501.90\n"
+            "   - COD return rate: 44.4%\n"
+            "   - Highest-risk segment: COD in Tier-2 cities at 54.5%\n"
+            "   - True peak month: March with revenue of INR 20,318.90"
         )
 
         # Build prompt dynamically by interpolating findings (avoiding hardcoded prompt strings)
         prompt = (
-            f"Generate a concise, professional SCR executive briefing based on the following verified metrics:\n"
-            f"- Cleaned Total Revenue: INR {findings['cleaned_total_revenue_inr']:,.2f} (Cleaned over 175 valid orders)\n"
-            f"- Part 1 Raw Revenue: INR {findings['raw_total_revenue_inr']:,.2f} (180 initial rows)\n"
-            f"- Duplicate Order Reconciliation Delta: INR {findings['duplicate_reconciliation_delta_inr']:,.2f} (5 double-submitted orders dropped)\n"
-            f"- Return Rates by Payment Method: COD = {findings['return_rate_by_payment']['COD']}%, "
-            f"CARD = {findings['return_rate_by_payment']['CARD']}%, UPI = {findings['return_rate_by_payment']['UPI']}%\n"
-            f"- Single Highest-Risk Segment: {findings['highest_risk_segment']['payment_method']} in Tier-{findings['highest_risk_segment']['city_tier']} cities "
-            f"with a return rate of {findings['highest_risk_segment']['return_rate_pct']}%\n"
-            f"- True Organic Peak Month: {findings['true_peak_month']['month']} (March) with verified revenue of INR {findings['true_peak_month']['revenue_inr']:,.2f}\n"
-            f"- Outlier-Distorted Month: {findings['outlier_inflated_month']['month']} (January) with apparent revenue of INR {findings['outlier_inflated_month']['apparent_revenue_inr']:,.2f} "
-            f"corrected down to INR {findings['outlier_inflated_month']['corrected_revenue_inr']:,.2f} after isolating two bulk orders.\n\n"
-            f"Format requirements:\n"
-            f"1. Exactly three sections titled ## Situation, ## Complication, and ## Resolution.\n"
-            f"2. Explicitly include all key metrics: INR 97,358.30 cleaned revenue, INR 2,501.90 duplicate delta, "
-            f"44.4% COD return rate, 54.5% COD Tier-2 return rate, and March peak of INR 20,318.90."
+            f"Please generate the complete SCR executive report using these verified figures:\n\n"
+            f"1. Revenue Overview:\n"
+            f"   - Raw database total (180 rows): INR {findings['raw_total_revenue_inr']:,.2f}\n"
+            f"   - Cleaned total revenue (175 valid rows): INR {findings['cleaned_total_revenue_inr']:,.2f}\n"
+            f"   - Financial reconciliation delta from 5 dropped duplicates: INR {findings['duplicate_reconciliation_delta_inr']:,.2f}\n\n"
+            f"2. Monthly Trends & Outliers:\n"
+            f"   - January apparent revenue (inflated by 2 bulk orders): INR {findings['outlier_inflated_month']['apparent_revenue_inr']:,.2f} (corrected to INR {findings['outlier_inflated_month']['corrected_revenue_inr']:,.2f})\n"
+            f"   - March true organic peak month: INR {findings['true_peak_month']['revenue_inr']:,.2f}\n\n"
+            f"3. Return Rates & Segmentation:\n"
+            f"   - COD return rate: {findings['return_rate_by_payment']['COD']}%\n"
+            f"   - Card return rate: {findings['return_rate_by_payment']['CARD']}%\n"
+            f"   - UPI return rate: {findings['return_rate_by_payment']['UPI']}%\n"
+            f"   - Highest-risk segment: {findings['highest_risk_segment']['payment_method']} orders in Tier-{findings['highest_risk_segment']['city_tier']} cities at {findings['highest_risk_segment']['return_rate_pct']}%\n\n"
+            f"Ensure all three sections (## Situation, ## Complication, ## Resolution) are completely written."
         )
 
         # Parameter locking:
         # - temperature=0.0: strictly deterministic factual reporting (no creative hallucinations)
-        # - max_output_tokens=1024: sufficient headroom to prevent truncated responses (Pitfall #5)
+        # - max_output_tokens=2048: ample headroom to ensure complete 3-section output
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
             temperature=0.0,
-            max_output_tokens=1024,
+            max_output_tokens=2048,
         )
 
         response = client.models.generate_content(
