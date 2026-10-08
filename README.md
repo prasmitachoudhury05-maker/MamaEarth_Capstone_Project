@@ -145,7 +145,14 @@ The script `narrator/generate_narrative.py` automatically asserts that all five 
 
 ## 📊 Visualizations
 
-1. **Return Rate by Payment Method:**
-   `visualizations/return_rate_by_payment.png` illustrates the 3x disparity between COD (44.4%) and Card (14.7%).
-2. **Monthly Revenue Trend:**
-   `visualizations/monthly_revenue_trend.png` showcases the outlier-corrected progression peaking in March at ₹20,318.90.
+### 1. Return Rate by Payment Method
+The chart below illustrates the ~3x disparity between Cash-on-Delivery (44.4%) and prepaid payment channels (Card: 14.7%, UPI: 18.9%):
+
+![Return Rate by Payment Method](visualizations/return_rate_by_payment.png)
+
+---
+
+### 2. Outlier-Corrected Monthly Revenue Trend
+The chart below shows the revenue trajectory across H1 2026, highlighting **March (₹20,318.90)** as the genuine organic peak month once the two January bulk anomalies are isolated:
+
+![Monthly Revenue Trend](visualizations/monthly_revenue_trend.png)
