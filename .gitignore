@@ -1,11 +1,32 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.db
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets and local configurations (Slide 13: Never commit API keys)
 .env
+*.env
+
+# SQLite databases (generated dynamically via sql/schema.sql & seed_data.sql)
+*.db
+*.sqlite
+*.sqlite3
+
+# Operating system metadata
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Guidelines & Reference decks
+# IDE & Editor configurations
+.vscode/
+.idea/
+
+# Course reference decks and downloaded guidelines (Slide 12: Clean repo only)
 Downloads/
 MamaEarth/
